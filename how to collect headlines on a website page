@@ -1,0 +1,31 @@
+library(httr)
+library(XML)
+
+### Go to https://www.svt.se/nyheter/ekonomi/,(example) scrape the content, restructure
+
+svt <- GET("https://www.svt.se/nyheter/ekonomi/")
+tsvt <- htmlParse(svt)
+
+## Fetch the news teasers
+nodes <- xpathSApply(tsvt, "//article[@class='nyh_teaser nyh_teaser--small']")
+
+#write a loop and collect information
+news <- list()
+for (i in 1:9){
+
+### Get the title, and the subtitle
+title <- xpathSApply(node[[i]], './/span[@class="nyh_teaser__heading-title"]', xmlValue)
+subtitle <- xpathSApply(node[[i]], './/span[@class="nyh_teaser__vignette"]', xmlValue)
+
+if (length(title)== 0)  {
+  title <- NA
+}
+ if (length(subtitle)== 0) {
+   subtitle <- NA
+}
+news[[i]] <- cbind(title,subtitle)# Store your results
+}# close your loop
+
+#Transform your list into a dataframe
+df <- as.data.frame(do.call(rbind, news))
+df
